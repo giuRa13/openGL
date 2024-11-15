@@ -68,6 +68,8 @@ int Window::Initialize()
 	glViewport(0, 0, bufferWidth, bufferHeight);
 
 	glfwSetWindowUserPointer(mainWindow, this);
+
+	return 0;
 }
 
 
@@ -135,7 +137,7 @@ void Window::handleMouse(GLFWwindow* window, double xPos, double yPos)
 	theWindow->lastX = xPos;
 	theWindow->lastY = yPos;
 
-	printf("X:%.4f, Y:%.4f\n", theWindow->xChange, theWindow->yChange);
+	//printf("X:%.4f, Y:%.4f\n", theWindow->xChange, theWindow->yChange);
 }
 
 
