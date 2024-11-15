@@ -43,6 +43,9 @@ find_package(Stb REQUIRED)
 
 add_executable(base
     src/main.cpp
+    src/Window.cpp
+    src/Mesh.cpp
+    src/Shader.cpp
 )
     
 
