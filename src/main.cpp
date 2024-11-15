@@ -13,13 +13,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 
-void glfw_onKey(GLFWwindow* window, int key, int scancode, int action, int mode)
-{
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, GL_TRUE);
-}
-
-
 Window mainWindow;
 std::vector<Mesh*> meshList;
 std::vector<Shader> shaderList;
@@ -69,7 +62,7 @@ void CreateShaders()
 
 int main()
 {
-	mainWindow = Window();
+	mainWindow = Window(800, 600);
 	mainWindow.Initialize();
     mainWindow.GetOpenGLVersionInfo();
 	
@@ -84,7 +77,6 @@ int main()
 	while (!mainWindow.getShouldClose())
 	{
 		glfwPollEvents();
-        glfwSetKeyCallback(mainWindow.getWindow(), glfw_onKey);
 
         /*if(direction)
             triOffset += triIncrement;
@@ -123,7 +115,8 @@ int main()
 		glUseProgram(0);
         ////////////////////////////////
 
-		glfwSwapBuffers(mainWindow.getWindow());
+		//glfwSwapBuffers(mainWindow.getWindow());
+		mainWindow.swapBuffers();
 	}
 
     return 0;
