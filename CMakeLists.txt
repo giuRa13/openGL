@@ -49,6 +49,7 @@ add_executable(base
     src/Camera.cpp
     src/Texture.cpp
     src/Light.cpp
+    src/Material.cpp
 )
     
 

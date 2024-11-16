@@ -39,6 +39,11 @@ glm::mat4 Camera::calculateViewMatrix()
     return glm::lookAt(position, position + front, up);
 }
 
+glm::vec3 Camera::getCameraPosition()
+{
+	return position;
+}
+
 
 void Camera::keyControl(bool* keys, GLfloat deltaTime)
 {
