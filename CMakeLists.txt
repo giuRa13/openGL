@@ -47,6 +47,7 @@ add_executable(base
     src/Mesh.cpp
     src/Shader.cpp
     src/Camera.cpp
+    src/Texture.cpp
 )
     
 
