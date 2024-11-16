@@ -8,6 +8,7 @@
 #include "Shader.hpp"
 #include "Camera.hpp"
 #include "Texture.hpp"
+#include "Light.hpp"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -23,13 +24,13 @@ std::vector<Shader> shaderList;
 Camera camera;
 Texture brickTexture;
 Texture brickTexture2;
-
-GLfloat deltaTime = 0.0f;
-GLfloat lastTime = 0.0f;
+Light mainLight;
 
 static const char* vShader = "../shaders/shader.vert";
 static const char* fShader = "../shaders/shader.frag";
 
+GLfloat deltaTime = 0.0f;
+GLfloat lastTime = 0.0f;
 const float toRadians = 3.14159265f / 180.0f;
 float curAngle = 0.0f;
 //bool direction = true;
@@ -39,11 +40,28 @@ float curAngle = 0.0f;
 
 void CreateTriangle()
 {
+	GLfloat verticesP[] = { 
+		-0.5f, -0.5f,  0.5f,  	0.0f, 0.0f, //left front
+		-0.5f, -0.5f, -0.5f, 	1.0f, 0.0f, //left front
+		0.5f, -0.5f, -0.5f,  	0.0f, 0.0f, //right back
+		0.5f, -0.5f,  0.5f,     1.0f, 0.0f, //right front
+		0.0f, 1.5f,  0.0f, 	0.5f, 1.0f // top
+	};
+	GLuint indicesP[] =
+	{
+		0, 1, 2,
+		0, 2, 3,
+		0, 1, 4,
+		1, 2, 4,
+		2, 3, 4,
+		3, 0, 4
+	};
+
 	GLfloat vertices[] = {
-		-1.0f, -1.0f, 0.0f,		0.0f, 0.0f, //BL
-		0.0f, -1.0f, 1.0f,  	0.5f, 0.0f, //back
-		1.0f, -1.0f, 0.0f,  	1.0f, 0.0f, ///BR
-		0.0f, 1.0f, -.0f,   	0.5f, 1.0f ///TOP
+		-0.5f, -0.5f, 0.0f,		0.0f, 0.0f, //BL
+		0.0f, -0.5f, 0.5f,  	0.5f, 0.0f, //back
+		0.5f, -0.5f, 0.0f,  	1.0f, 0.0f, ///BR
+		0.0f, 0.5f, -0.0f,   	0.5f, 1.0f ///TOP
 	};
 	unsigned int indices[] = {
 		0, 3, 1,  // side
@@ -59,6 +77,10 @@ void CreateTriangle()
 	Mesh *obj2 = new Mesh();
 	obj2->CreateMesh(vertices, indices, 20, 12);
 	meshList.push_back(obj2);
+
+	Mesh *obj3 = new Mesh();
+	obj3->CreateMesh(verticesP, indicesP, 25, 18);
+	meshList.push_back(obj3);
 }
 
 void CreateShaders()
@@ -86,7 +108,10 @@ int main()
 	brickTexture2 = Texture("../textures/bricks_yellow.jpg");
 	brickTexture2.LoadTexture();
 
-	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0;;
+	mainLight = Light(1.0f, 1.0f, 1.0f, 1.0f);
+
+	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0;
+	GLuint uniformAmbientIntensity = 0, uniformAmbientColour = 0;
 
 	glm::mat4 projection = glm::perspective(45.0f, mainWindow.getBufferWidth() / mainWindow.getBufferHeight(), 0.1f, 100.0f);
 
@@ -103,18 +128,19 @@ int main()
 		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
 
         /*if(direction)
-            triOffset += triIncrement;
-        else
-            triOffset -= triIncrement;
+			triOffset += triIncrement;
+		else
+			triOffset -= triIncrement;
 
-        if (abs(triOffset) >= triMaxOffset)
-            direction = !direction;
+		if (abs(triOffset) >= triMaxOffset)
+			direction = !direction;
 
 		curAngle += 0.001f;
 		if(curAngle >= 360)
 			curAngle -= 360;*/
 
-		glClearColor(0.25f, 0.47f, 0.75f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		//glClearColor(0.25f, 0.47f, 0.75f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         /////////////////////////////////
@@ -122,6 +148,10 @@ int main()
 		uniformModel = shaderList[0].GetModelLocation();
 		uniformProjection = shaderList[0].GetProjectionLocation();
 		uniformView = shaderList[0].GetViewLocation();
+		uniformAmbientColour = shaderList[0].GetAmbientColourLocation();
+		uniformAmbientIntensity = shaderList[0].GetAmbientIntensityLocation();
+
+		mainLight.UseLight(uniformAmbientIntensity, uniformAmbientColour);
 
         glm::mat4 model(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f,-2.5f));
@@ -138,7 +168,14 @@ int main()
 		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		brickTexture2.UseTexture();
-		meshList[1]->RenderMesh();
+		//meshList[1]->RenderMesh();
+
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, -1.0f,-3.5f));
+		model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.5f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		brickTexture.UseTexture();
+		meshList[2]->RenderMesh();
 
 		glUseProgram(0);
         ////////////////////////////////
