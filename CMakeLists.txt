@@ -50,6 +50,8 @@ add_executable(base
     src/Texture.cpp
     src/Light.cpp
     src/Material.cpp
+    src/DirectionalLight.cpp
+    src/PointLight.cpp
 )
     
 
