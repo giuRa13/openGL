@@ -52,6 +52,7 @@ add_executable(base
     src/Material.cpp
     src/DirectionalLight.cpp
     src/PointLight.cpp
+    src/SpotLight.cpp
 )
     
 

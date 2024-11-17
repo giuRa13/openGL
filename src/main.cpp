@@ -10,6 +10,7 @@
 #include "Texture.hpp"
 #include "DirectionalLight.hpp"
 #include "PointLight.hpp"
+#include "SpotLight.hpp"
 #include "Material.hpp"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -28,6 +29,7 @@ Texture brickTexture2;
 Texture gridTexture;
 DirectionalLight mainLight;
 PointLight pointLights[MAX_POINT_LIGHTS];
+SpotLight spotLights[MAX_SPOT_LIGHTS];
 Material shinyMaterial;
 Material dullMaterial;
 
@@ -165,7 +167,7 @@ int main()
 	dullMaterial = Material(0.3f, 4);
 
 	mainLight = DirectionalLight(1.0f, 1.0f, 1.0f, 
-								0.0f, 0.0f,  //2.0f, 0.3f
+								0.1f, 0.1f,  //2.0f, 0.3f
 								0.0f, 0.0f, -1.0f); //-1.0f, -2.0f
 	
 	unsigned int pointLightCount = 0;
@@ -179,6 +181,22 @@ int main()
 								-4.0f, 2.0f, 0.0f,
 								0.3f, 0.1f, 0.1f);
 	pointLightCount++;
+
+	unsigned int spotLightCount = 0;
+	spotLights[0] = SpotLight(1.0f, 1.0f, 1.0f,
+							  0.0f, 4.0f,
+							  0.0f, 0.0f, 0.0f,
+							  0.0f, -1.0f, 0.0f,
+							  0.3f, 0.2f, 0.1f,
+							  20.0f);
+	spotLightCount++;
+	spotLights[1] = SpotLight(1.0f, 1.0f, 1.0f,
+							  0.0f, 8.5f,
+							  0.0f, 0.0f, 0.0f,
+							  -10.0f, -1.0f, 0.0f,
+							  1.0f, 0.2f, 0.0f,
+							  20.0f);
+	spotLightCount++;
 
 	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0;
 	//GLuint uniformAmbientIntensity = 0, uniformAmbientColour = 0;
@@ -228,8 +246,14 @@ int main()
 		uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
 		uniformShininess = shaderList[0].GetShininessLocation();
 
+		glm::vec3 lowerLight = camera.getCameraPosition();
+		lowerLight.y -= 0.1f;
+		//spotLights[0].SetFlash(camera.getCameraPosition(), camera.getCameraDirection()); //attach to camera
+		spotLights[0].SetFlash(lowerLight, camera.getCameraDirection());
+
 		shaderList[0].SetDirectionalLight(&mainLight);
 		shaderList[0].SetPointLight(pointLights, pointLightCount);
+		shaderList[0].SetSpotLight(spotLights, spotLightCount);
 
 		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
