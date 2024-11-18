@@ -12,6 +12,9 @@
             "name": "glfw3"
         },
         {
+            "name": "assimp"
+        },
+        {
             "name": "stb"
         }
     ]

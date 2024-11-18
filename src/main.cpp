@@ -12,12 +12,12 @@
 #include "PointLight.hpp"
 #include "SpotLight.hpp"
 #include "Material.hpp"
+#include "Model.hpp"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
 
 
 Window mainWindow;
@@ -32,6 +32,7 @@ PointLight pointLights[MAX_POINT_LIGHTS];
 SpotLight spotLights[MAX_SPOT_LIGHTS];
 Material shinyMaterial;
 Material dullMaterial;
+Model cottage;
 
 static const char* vShader = "../shaders/shader.vert";
 static const char* fShader = "../shaders/shader.frag";
@@ -157,14 +158,17 @@ int main()
 	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 2.0f, 0.005f);
 
 	brickTexture = Texture("../textures/bricks_white.jpg");
-	brickTexture.LoadTexture();
+	brickTexture.LoadTextureA();
 	brickTexture2 = Texture("../textures/bricks_yellow.jpg");
-	brickTexture2.LoadTexture();
+	brickTexture2.LoadTextureA();
 	gridTexture = Texture("../textures/g1572.png");
-	gridTexture.LoadTexture();
+	gridTexture.LoadTextureA();
 
 	shinyMaterial = Material(1.0f, 256);
 	dullMaterial = Material(0.3f, 4);
+
+	cottage = Model();
+	cottage.LoadModel("../models/girl.obj");
 
 	mainLight = DirectionalLight(1.0f, 1.0f, 1.0f, 
 								0.1f, 0.1f,  //2.0f, 0.3f
@@ -290,6 +294,14 @@ int main()
 		gridTexture.UseTexture();
 		shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		meshList[3]->RenderMesh();
+
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(3.0f, -0.5f, -5.0f));
+		//model = glm::scale(model, glm::vec3(0.009f, 0.009f, 0.009f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		shinyMaterial.UseMaterial(uniformSpecularIntensity, uniformShininess);
+		cottage.RenderModel();
+
 
 		glUseProgram(0);
         ////////////////////////////////

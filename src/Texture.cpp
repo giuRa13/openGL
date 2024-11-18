@@ -20,15 +20,43 @@ Texture::Texture(const char* fileLocation)
     filepath = fileLocation;
 }
 
+bool Texture::LoadTexture()
+{
+    unsigned char *texData = stbi_load(filepath, &width, &height, &bitDepth, 0);
 
-void Texture::LoadTexture()
+    if(!texData)
+    {
+        printf("Failed to find %s\n", filepath);
+        return false;
+    }
+
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texData);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D ,0);
+    stbi_image_free(texData);
+
+    return true;
+}
+
+bool Texture::LoadTextureA()
 {
     unsigned char *texData = stbi_load(filepath, &width, &height, &bitDepth, STBI_rgb_alpha);
 
     if(!texData)
     {
         printf("Failed to find %s\n", filepath);
-        return;
+        return false;
     }
 
     glGenTextures(1, &textureID);
@@ -46,6 +74,8 @@ void Texture::LoadTexture()
 
     glBindTexture(GL_TEXTURE_2D ,0);
     stbi_image_free(texData);
+
+    return true;
 }
 
 
