@@ -9,13 +9,22 @@
             "name": "opengl"
         },
         {
-            "name": "glfw3"
+            "name": "sdl2"
         },
         {
             "name": "assimp"
         },
         {
             "name": "stb"
+        },
+        {
+            "name": "imgui",
+            "default-features": false,
+            "features": [
+                "sdl2-binding",
+                "opengl3-binding",
+                "docking-experimental"
+            ]
         }
     ]
 }

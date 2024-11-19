@@ -1,4 +1,5 @@
 #include "Camera.hpp"
+#include "Input.hpp"
 
 
 Camera::Camera() {}
@@ -49,19 +50,31 @@ glm::vec3 Camera::getCameraDirection()
     return glm::normalize(front);
 }
 
-void Camera::keyControl(bool* keys, GLfloat deltaTime)
+void Camera::keyControl(GLfloat deltaTime)
 {
     GLfloat velocity = moveSpeed * deltaTime;
 
-    if(keys[GLFW_KEY_W])
-        position += front * velocity;
-    else if(keys[GLFW_KEY_S])
-        position -= front * velocity;
+    if(Input::Instance()->IsKeyPressed())
+    {
+        if(Input::Instance()->GetKeyDown() == 'a')
+            position -= right * velocity;
+        else if(Input::Instance()->GetKeyDown() == 'd')
+            position += right * velocity;
+        else if(Input::Instance()->GetKeyDown() == 'w')
+            position += front * velocity;
+        else if(Input::Instance()->GetKeyDown() == 's')
+            position -= front * velocity;
+        else if(Input::Instance()->GetKeyDown() == 'i')
+            pitch += 1;
+        else if(Input::Instance()->GetKeyDown() == 'k')
+            pitch -= 1;
+        else if(Input::Instance()->GetKeyDown() == 'j')
+            yaw -= 1;
+        else if(Input::Instance()->GetKeyDown() == 'l')
+            yaw += 1; 
+    }
 
-    if(keys[GLFW_KEY_A])
-        position -= right * velocity;
-    else if(keys[GLFW_KEY_D])
-        position += right * velocity;   
+    update();
 }
 
 void Camera::mouseControl(GLfloat xChange, GLfloat yChange)
@@ -81,3 +94,7 @@ void Camera::mouseControl(GLfloat xChange, GLfloat yChange)
     update();
 }
 
+void Camera::SetViewport(GLint x, GLint y, GLsizei width, GLsizei height)
+{
+    glViewport(x, y, width, height);
+}

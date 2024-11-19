@@ -13,12 +13,22 @@
 #include "SpotLight.hpp"
 #include "Material.hpp"
 #include "Model.hpp"
+#include "Screen.hpp"
+#include "Input.hpp"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "imgui.h"
+#include "imgui_impl_sdl2.h"
+#include "imgui_impl_opengl3.h"
 
+bool isRunning = true;
+const int SCREEN_WIDTH = 1920;
+const int SCREEN_HEIGHT = 956;
+const int CONSOLE_HEIGHT = 250;
+const int PROPERTIES_WIDTH = 400;
 
 Window mainWindow;
 std::vector<Mesh*> meshList;
@@ -144,7 +154,20 @@ void CreateShaders()
 	shaderList.push_back(*shader1);
 }
 
+void RenderConsoleWindow()
+{
+	ImGui::Begin("Output console", nullptr,
+		ImGuiWindowFlags_::ImGuiWindowFlags_NoResize |
+		//ImGuiWindowFlags_::ImGuiWindowFlags_NoMove |
+		ImGuiWindowFlags_::ImGuiWindowFlags_NoCollapse);
 
+	auto windowPos = ImVec2(0, SCREEN_HEIGHT - CONSOLE_HEIGHT);
+	auto windowSize = ImVec2(SCREEN_WIDTH - PROPERTIES_WIDTH, CONSOLE_HEIGHT);
+	ImGui::SetWindowPos("Output console", windowPos);
+	ImGui::SetWindowSize("Output console", windowSize);
+
+	ImGui::End();
+}
 
 int main()
 {
@@ -156,6 +179,10 @@ int main()
 	CreateShaders();
 
 	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 2.0f, 0.005f);
+	camera.SetViewport(0, 
+				CONSOLE_HEIGHT, 
+				SCREEN_WIDTH - PROPERTIES_WIDTH,
+				SCREEN_HEIGHT - CONSOLE_HEIGHT);
 
 	brickTexture = Texture("../textures/bricks_white.jpg");
 	brickTexture.LoadTextureA();
@@ -207,19 +234,22 @@ int main()
 	//GLuint uniformDiffuseIntensity = 0, uniformDirection = 0;
 	GLuint uniformSpecularIntensity = 0, uniformShininess = 0, uniformEyePosition = 0;
 
-	glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)mainWindow.getBufferWidth() / mainWindow.getBufferHeight(), 0.1f, 100.0f);
+	//glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)mainWindow.getBufferWidth() / mainWindow.getBufferHeight(), 0.1f, 100.0f);
+	glm::mat4 projection = glm::perspective(glm::radians(45.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
 
-
-	while (!mainWindow.getShouldClose())
+	while (isRunning)
 	{
-		GLfloat now = glfwGetTime(); // SDL_GetPerformanceCounter();
-		deltaTime = now - lastTime;  // (now - lastTime)*1000 / SDL_GetPerformanceFrequency();
+		GLfloat now =  SDL_GetPerformanceCounter();
+		deltaTime = (now - lastTime) / SDL_GetPerformanceFrequency();
 		lastTime = now;
 
-		glfwPollEvents();
+		Input::Instance()->Update();
+        isRunning = !Input::Instance()->IsXClicked();
+		if(Input::Instance()->GetKeyDown() == SDLK_ESCAPE)
+            isRunning = false;
 
-		camera.keyControl(mainWindow.getKeys(), deltaTime);
-		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
+		camera.keyControl(deltaTime);
+		//camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
 
         /*if(direction)
 			triOffset += triIncrement;
@@ -233,19 +263,25 @@ int main()
 		if(curAngle >= 360)
 			curAngle -= 360;*/
 
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		//glClearColor(0.25f, 0.47f, 0.75f, 1.0f);
+		//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(0.25f, 0.47f, 0.75f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplSDL2_NewFrame();
+		ImGui::NewFrame();
+
+		RenderConsoleWindow();
+		ImGui::ShowDemoWindow();
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         /////////////////////////////////
         shaderList[0].UseShader();
 		uniformModel = shaderList[0].GetModelLocation();
 		uniformProjection = shaderList[0].GetProjectionLocation();
 		uniformView = shaderList[0].GetViewLocation();
-		//uniformAmbientColour = shaderList[0].GetAmbientColourLocation();
-		//uniformAmbientIntensity = shaderList[0].GetAmbientIntensityLocation();
-		//uniformDirection = shaderList[0].GetDirectionLocation(),
-		//uniformDiffuseIntensity = shaderList[0].GetDiffuseIntensityLocation();
 		uniformEyePosition = shaderList[0].GetEyePositionLocation();
 		uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
 		uniformShininess = shaderList[0].GetShininessLocation();
@@ -306,8 +342,7 @@ int main()
 		glUseProgram(0);
         ////////////////////////////////
 
-		//glfwSwapBuffers(mainWindow.getWindow());
-		mainWindow.swapBuffers();
+		mainWindow.Present();
 	}
 
     return 0;

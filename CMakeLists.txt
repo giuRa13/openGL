@@ -25,13 +25,13 @@ set (VCPKG_DIR "/home/giuli/vcpkg")
 include(${VCPKG_DIR}/scripts/buildsystems/vcpkg.cmake)
 
 find_package(glad CONFIG REQUIRED)
-find_package(glfw3 CONFIG REQUIRED)
+#find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
-#find_package(SDL2 CONFIG REQUIRED)
+find_package(SDL2 CONFIG REQUIRED)
 #find_package(SDL2_image CONFIG REQUIRED)
 #find_package(SDL2_mixer CONFIG REQUIRED)
-#find_package(imgui CONFIG REQUIRED)
+find_package(imgui CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(Stb REQUIRED)
 #find_package(soil2 CONFIG REQUIRED)
@@ -55,6 +55,7 @@ add_executable(base
     src/PointLight.cpp
     src/SpotLight.cpp
     src/Model.cpp
+    src/Input.cpp
 )
     
 
@@ -71,13 +72,13 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 target_link_libraries(${PROJECT_NAME} PRIVATE glad::glad)
 target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm)
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
+#target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 target_link_libraries(${PROJECT_NAME} PRIVATE assimp::assimp)
-#target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2)
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2)
 #target_link_libraries(${PROJECT_NAME} PRIVATE SDL2_image)
 #target_link_libraries(${PROJECT_NAME} PRIVATE SDL2_mixer)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL)
-#target_link_libraries(${PROJECT_NAME} PRIVATE imgui::imgui)
+target_link_libraries(${PROJECT_NAME} PRIVATE imgui::imgui)
 #target_link_libraries(${PROJECT_NAME} PRIVATE external_lib)
 
 
